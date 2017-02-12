@@ -1,10 +1,13 @@
 package com.zhenzong.coolweather.util;
 
 import android.text.TextUtils;
+import android.util.Log;
 
+import com.google.gson.Gson;
 import com.zhenzong.coolweather.bean.City;
 import com.zhenzong.coolweather.bean.County;
 import com.zhenzong.coolweather.bean.Province;
+import com.zhenzong.coolweather.bean.Weather;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -38,6 +41,7 @@ public class JsonUtil {
                 }
                 return true;
             } catch (JSONException e) {
+                Log.e("util", "解析出错");
                 e.printStackTrace();
             }
         }
@@ -96,5 +100,23 @@ public class JsonUtil {
             }
         }
         return false;
+    }
+
+    /**
+     * 解析天气数据
+     *
+     * @param response
+     * @return 解析成功之后，封闭成Weather对象
+     */
+    public static Weather handleWeatherResponse(String response) {
+        try {
+            JSONObject jsonObject = new JSONObject(response);
+            JSONArray jsonArray = jsonObject.getJSONArray("HeWeather");
+            String weatherStr = jsonArray.getJSONObject(0).toString();
+            return new Gson().fromJson(weatherStr, Weather.class);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

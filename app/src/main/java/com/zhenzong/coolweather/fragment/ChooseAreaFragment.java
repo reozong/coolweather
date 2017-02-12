@@ -1,9 +1,11 @@
 package com.zhenzong.coolweather.fragment;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.zhenzong.coolweather.R;
+import com.zhenzong.coolweather.WeatherActivity;
 import com.zhenzong.coolweather.bean.City;
 import com.zhenzong.coolweather.bean.County;
 import com.zhenzong.coolweather.bean.Province;
@@ -128,6 +131,13 @@ public class ChooseAreaFragment extends Fragment {
                         selectedCity = cityList.get(position);
                         queryCounties();
                         break;
+                    case LEVEL_COUNTY: //选定了最小区域后，就跳转到天气显示界面
+                        String weatherId = countyList.get(position).getWeatherId();
+                        Intent intent = new Intent(getActivity(), WeatherActivity.class);
+                        intent.putExtra("weather_id", weatherId);
+                        startActivity(intent);
+                        getActivity().finish();
+                        break;
                 }
             }
         });
@@ -233,7 +243,8 @@ public class ChooseAreaFragment extends Fragment {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                String json = response.body().toString();
+                String json = response.body().string();
+                Log.w("Area", json);
                 boolean result = false;
                 switch (type) {
                     case LEVEL_PROVINCE:
