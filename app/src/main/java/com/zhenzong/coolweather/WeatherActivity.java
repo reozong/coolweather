@@ -1,5 +1,6 @@
 package com.zhenzong.coolweather;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
@@ -23,6 +24,7 @@ import com.bumptech.glide.Glide;
 import com.zhenzong.coolweather.bean.Forecast;
 import com.zhenzong.coolweather.bean.Weather;
 import com.zhenzong.coolweather.constant.Global;
+import com.zhenzong.coolweather.service.AutoUpdateService;
 import com.zhenzong.coolweather.util.HttpUtil;
 import com.zhenzong.coolweather.util.JsonUtil;
 
@@ -69,7 +71,9 @@ public class WeatherActivity extends AppCompatActivity {
             //有缓存时直接解析天气数据
             Weather weather = JsonUtil.handleWeatherResponse(weatherStr);
             weatherId = weather.basic.weatherId;
-            showWeatherInfo(weather);
+            if (weather != null) {
+                showWeatherInfo(weather);
+            }
         } else {
             weatherId = getIntent().getStringExtra("weather_id");
             weatherLayout.setVisibility(View.INVISIBLE);
@@ -208,7 +212,7 @@ public class WeatherActivity extends AppCompatActivity {
             forecastLayout.addView(view);
         }
 
-        if (weather != null && weather.aqi != null) {
+        if (weather.aqi != null) {
             aqiText.setText(weather.aqi.city.aqi);
             pm25Text.setText(weather.aqi.city.pm25);
         } else {
@@ -220,6 +224,12 @@ public class WeatherActivity extends AppCompatActivity {
         carWashText.setText("洗车指数：" + weather.suggestion.carWash.info);
         sportText.setText("运动建议：" + weather.suggestion.sport.info);
         weatherLayout.setVisibility(View.VISIBLE);
+
+        if (weather.status.equals("ok")) {
+            startService(new Intent(this, AutoUpdateService.class));
+        } else {
+            Toast.makeText(this, "获取天气信息失败，您可以手动更新", Toast.LENGTH_SHORT).show();
+        }
     }
 
 }
