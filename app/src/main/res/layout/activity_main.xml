@@ -5,7 +5,7 @@
     android:layout_height = "match_parent">
 
     <fragment
-        android:id = "@+id/choose_area_fragment"
+        android:id="@+id/area_choose_fragment"
         android:name = "com.zhenzong.coolweather.fragment.ChooseAreaFragment"
         android:layout_width = "match_parent"
         android:layout_height = "match_parent" />

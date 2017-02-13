@@ -16,6 +16,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.zhenzong.coolweather.MainActivity;
 import com.zhenzong.coolweather.R;
 import com.zhenzong.coolweather.WeatherActivity;
 import com.zhenzong.coolweather.bean.City;
@@ -52,57 +53,8 @@ public class ChooseAreaFragment extends Fragment {
     private List<County> countyList;
     private Province selectedProvince;
     private City selectedCity;
-    //    private County selectedCounty;
     private int currentLevel;
 
-
-//    private static final String ARG_PARAM1 = "param1";
-//    private static final String ARG_PARAM2 = "param2";
-//    private String mParam1;
-//    private String mParam2;
-
-//    private OnFragmentInteractionListener mListener;
-//
-//    public ChooseAreaFragment() {
-//        // Required empty public constructor
-//    }
-
-
-//    public static ChooseAreaFragment newInstance(String param1, String param2) {
-//        ChooseAreaFragment fragment = new ChooseAreaFragment();
-//        Bundle args = new Bundle();
-//        args.putString(ARG_PARAM1, param1);
-//        args.putString(ARG_PARAM2, param2);
-//        fragment.setArguments(args);
-//        return fragment;
-//    }
-
-
-//    public void onButtonPressed(Uri uri) {
-//        if (mListener != null) {
-//            mListener.onFragmentInteraction(uri);
-//        }
-//    }
-//
-//    @Override
-//    public void onAttach(Context context) {
-//        super.onAttach(context);
-//        if (context instanceof OnFragmentInteractionListener) {
-//            mListener = (OnFragmentInteractionListener) context;
-//        } else {
-//            throw new RuntimeException(context.toString() + " must implement OnFragmentInteractionListener");
-//        }
-//    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-//        if (getArguments() != null) {
-//            mParam1 = getArguments().getString(ARG_PARAM1);
-//            mParam2 = getArguments().getString(ARG_PARAM2);
-//        }
-
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -133,10 +85,17 @@ public class ChooseAreaFragment extends Fragment {
                         break;
                     case LEVEL_COUNTY: //选定了最小区域后，就跳转到天气显示界面
                         String weatherId = countyList.get(position).getWeatherId();
-                        Intent intent = new Intent(getActivity(), WeatherActivity.class);
-                        intent.putExtra("weather_id", weatherId);
-                        startActivity(intent);
-                        getActivity().finish();
+                        if (getActivity() instanceof MainActivity) {
+                            Intent intent = new Intent(getActivity(), WeatherActivity.class);
+                            intent.putExtra("weather_id", weatherId);
+                            startActivity(intent);
+                            getActivity().finish();
+                        } else if (getActivity() instanceof WeatherActivity) {
+                            WeatherActivity weatherActivity = (WeatherActivity) getActivity();
+                            weatherActivity.drawerLayout.closeDrawers();
+                            weatherActivity.swipeRefresh.setRefreshing(true);
+                            weatherActivity.requestWeather(weatherId);
+                        }
                         break;
                 }
             }
@@ -146,10 +105,10 @@ public class ChooseAreaFragment extends Fragment {
             public void onClick(View v) {
                 switch (currentLevel) {
                     case LEVEL_CITY:
-                        queryCities();
+                        queryProvinces();
                         break;
                     case LEVEL_COUNTY:
-                        queryCounties();
+                        queryCities();
                         break;
                 }
             }
@@ -171,7 +130,7 @@ public class ChooseAreaFragment extends Fragment {
                 dataList.add(province.getProvinceName());
             }
             adapter.notifyDataSetChanged();
-//            listView.setSelection(0);
+            listView.setSelection(0);
             currentLevel = LEVEL_PROVINCE;
         } else { //本地数据库没有数据就请求服务器
             requestServer(CHINA_CITY, LEVEL_PROVINCE);
@@ -192,7 +151,7 @@ public class ChooseAreaFragment extends Fragment {
                 dataList.add(city.getCityName());
             }
             adapter.notifyDataSetChanged();
-//            listView.setSelection(0);
+            listView.setSelection(0);
             currentLevel = LEVEL_CITY;
         } else {
             String address = CHINA_CITY + "/" + selectedProvince.getProvinceCode();
@@ -213,7 +172,7 @@ public class ChooseAreaFragment extends Fragment {
                 dataList.add(county.getCountyName());
             }
             adapter.notifyDataSetChanged();
-//            listView.setSelection(0);
+            listView.setSelection(0);
             currentLevel = LEVEL_COUNTY;
         } else {
             String address = CHINA_CITY + "/" + selectedProvince.getProvinceCode() + "/" + selectedCity.getCityCode();
@@ -300,19 +259,5 @@ public class ChooseAreaFragment extends Fragment {
             progressDialog.dismiss();
         }
     }
-
-//    @Override
-//    public void onDetach() {
-//        super.onDetach();
-//        mListener = null;
-//    }
-//
-//    /**
-//     *
-//     */
-//    public interface OnFragmentInteractionListener {
-//        // TODO: Update argument type and name
-//        void onFragmentInteraction(Uri uri);
-//    }
 
 }
